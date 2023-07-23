@@ -42,6 +42,13 @@ func New(cfg *config.Config, logger logx.Logger) *Processor {
 		)
 	}
 
+	if cfg.Input != nil {
+		mods = append(mods,
+			modifiers.NewSprintLockModifier(cfg.Input.SprintLock, logger),
+			modifiers.NewCrouchLockModifier(cfg.Input.CrouchHold, logger),
+		)
+	}
+
 	return &Processor{
 		cfg:       cfg,
 		modifiers: mods,
