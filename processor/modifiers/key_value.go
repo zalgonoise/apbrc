@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/zalgonoise/attr"
 	"github.com/zalgonoise/logx"
@@ -123,24 +121,10 @@ scanLoop:
 	return nil
 }
 
-func getValue(line []byte) any {
-	split := strings.Split(string(line), "=")
-	if len(split) > 1 {
-		v, err := strconv.Atoi(split[1])
-		if err == nil {
-			return v
-		}
-
-		return split[1]
-	}
-
-	return string(line)
-}
-
 func (m KeyValueModifier[T]) logMatch(line []byte, kv KeyValue[T]) {
 	m.logger.Info("matched config key",
 		attr.String("key", kv.Key),
 		attr.New("new_value", kv.Value),
-		attr.New("original_value", getValue(line)),
+		attr.String("original_value", string(line)),
 	)
 }
