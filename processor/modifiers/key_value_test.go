@@ -8,6 +8,7 @@ import (
 	"github.com/zalgonoise/logx"
 	"github.com/zalgonoise/logx/handlers/texth"
 
+	"github.com/zalgonoise/apbrc/processor"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
 )
 
@@ -42,32 +43,38 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 		baseDir           = "./internal/testdata/"
 		resultsDir        = "/results"
 		topLevel          = "/APB Reloaded"
-		defaultTarget     = "/Engine/Config"
-		filename          = "/BaseEngine.ini"
 		fpsModifierFormat = "%s=%d\r\n"
 		logger            = logx.New(texth.New(os.Stderr))
 	)
 
 	for _, testcase := range []struct {
-		name      string
-		targetDir string
-		modifier  modifiers.KeyValueModifier[int]
+		name          string
+		targetTestDir string
+		targetDir     string
+		targetFile    string
+		modifier      processor.Modifier
 	}{
 		{
-			name:      "Original/Complete",
-			targetDir: "complete_orig",
-			modifier:  modifiers.NewFPSModifier(60, 300, 300, logger),
+			name:          "FPSModifier/Original/Complete",
+			targetTestDir: "fps/complete_orig",
+			targetDir:     "/Engine/Config",
+			targetFile:    "/BaseEngine.ini",
+			modifier:      modifiers.NewFPSModifier(60, 300, 300, logger),
 		},
 		{
-			name:      "Original/Short",
-			targetDir: "short_orig",
-			modifier:  modifiers.NewFPSModifier(60, 300, 300, logger),
+			name:          "FPSModifier/Original/Short",
+			targetTestDir: "fps/short_orig",
+			targetDir:     "/Engine/Config",
+			targetFile:    "/BaseEngine.ini",
+			modifier:      modifiers.NewFPSModifier(60, 300, 300, logger),
 		},
 		{
-			name:      "Fake",
-			targetDir: "test_fake",
+			name:          "FPSModifier/Fake",
+			targetTestDir: "fps/short_fake",
+			targetDir:     "/Engine/Config",
+			targetFile:    "/BaseEngine.ini",
 			modifier: modifiers.NewKeyValueModifier(
-				defaultTarget+filename, logger,
+				"/Engine/Config/BaseEngine.ini", logger,
 				modifiers.KeyValue[int]{
 					Key:    "SomeAttributeKey",
 					Value:  600,
@@ -85,11 +92,25 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 				},
 			),
 		},
+		{
+			name:          "SprintLock/Original/Complete",
+			targetTestDir: "sprint/complete_orig",
+			targetDir:     "/APBGame/Config",
+			targetFile:    "/DefaultInput.ini",
+			modifier:      modifiers.NewSprintLockModifier(true, logger),
+		},
+		{
+			name:          "CrouchLock/Original/Complete",
+			targetTestDir: "crouch/complete_orig",
+			targetDir:     "/APBGame/Config",
+			targetFile:    "/DefaultInput.ini",
+			modifier:      modifiers.NewCrouchLockModifier(true, logger),
+		},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			fs := &testFS{
-				basePath: baseDir + testcase.targetDir + topLevel,
-				filePath: defaultTarget + filename,
+				basePath: baseDir + testcase.targetTestDir + topLevel,
+				filePath: testcase.targetDir + testcase.targetFile,
 			}
 
 			data, err := os.ReadFile(fs.basePath + fs.filePath)
@@ -98,14 +119,14 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			fs.origData = data
 			defer fs.Rollback()
 
-			path := baseDir + testcase.targetDir + topLevel
+			path := baseDir + testcase.targetTestDir + topLevel
 			err = testcase.modifier.Apply(path)
 			require.NoError(t, err)
 
 			data, err = os.ReadFile(fs.basePath + fs.filePath)
 			require.NoError(t, err)
 
-			wants, err := os.ReadFile(baseDir + testcase.targetDir + resultsDir + filename)
+			wants, err := os.ReadFile(baseDir + testcase.targetTestDir + resultsDir + testcase.targetFile)
 			require.NoError(t, err)
 			require.Equal(t, wants, data)
 		})
