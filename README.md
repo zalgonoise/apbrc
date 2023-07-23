@@ -72,7 +72,7 @@ behavior:
 
 __Target__: `\Engine\Config\BaseEngine.ini`
 
-|          Key           | Default |                                          Value                                           |
+|          Key           | Default |                                       Description                                        |
 |:----------------------:|:-------:|:----------------------------------------------------------------------------------------:|
 | `MinSmoothedFrameRate` |   22    | Changes the minimum frame rate when the `Smoothed` option is set, in the game's Settings |
 | `MaxSmoothedFrameRate` |   100   | Changes the maximum frame rate when the `Smoothed` option is set, in the game's Settings |
@@ -87,6 +87,28 @@ Below are the configuration flags that modify these values
 |   `-max`    | `int` |   60    | Maximum frame rate value to set  |
 | `-smoothed` | `int` |   60    | Smoothed frame rate value to set |
 
+
+#### [Input Bindings Modifiers](./processor/modifiers/sprint_lock.go)
+
+This modifier changes the behavior of the Sprint action, causing it to toggle __off__ when held down, which is the 
+opposite behavior of the key. It allows to always sprint without holding the assigned key for it.
+
+__Target__: `\APBGame\Config\DefaultInput.ini`
+
+|            Key             |                                       Default                                        |                                       Description                                       |
+|:--------------------------:|:------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------:|
+| `+Bindings=(Name="Sprint"` | `+Bindings=(Name="Sprint",Command="InputSprinting \| OnRelease InputStopSprinting")` | Changes the behavior of the Sprint action, on what happens on key-press and key-release |
+|  `+Bindings=(Name="Duck"`  |     `+Bindings=(Name="Duck",Command="Button m_bDuckButton \| InputToggleDuck")`      | Changes the behavior of the Crouch action, on what happens on key-press and key-release |
+
+
+Below are the configuration flags that modify these values. If `-lock-sprint` and `-hold-crouch` are both unset, no changes occur. 
+If the caller wants to reset the input configuration mods, they should use the `-reset-input` option instead.
+
+|      Flag      |  Type  | Default |                     Description                     |
+|:--------------:|:------:|:-------:|:---------------------------------------------------:|
+| `-lock-sprint` | `bool` |   N/A   |      Sets the input bindings to always sprint       |
+| `-hold-crouch` | `bool` |   N/A   | Sets the input bindings to press-and-hold to crouch |
+| `-reset-input` | `bool` |   N/A   |       Resets any input bindings modifications       |
 
 _______
 
