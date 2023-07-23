@@ -40,26 +40,28 @@ func (fs *testFS) Rollback() error {
 
 func TestProcessor_Run(t *testing.T) {
 	var (
-		baseDir       = "./modifiers/internal/testdata/"
-		resultsDir    = "/results"
-		binariesDir   = "/Binaries"
-		topLevel      = "/APB Reloaded"
-		defaultTarget = "/Engine/Config"
-		filename      = "/BaseEngine.ini"
-		logger        = logx.New(texth.New(os.Stderr))
+		baseDir     = "./modifiers/internal/testdata/"
+		resultsDir  = "/results"
+		binariesDir = "/Binaries"
+		topLevel    = "/APB Reloaded"
+		logger      = logx.New(texth.New(os.Stderr))
 	)
 
 	for _, testcase := range []struct {
-		name      string
-		targetDir string
-		cfg       *config.Config
-		err       error
+		name          string
+		targetTestDir string
+		targetDir     string
+		targetFile    string
+		cfg           *config.Config
+		err           error
 	}{
 		{
-			name:      "Original/Complete",
-			targetDir: "complete_orig",
+			name:          "FPS/Original/Complete",
+			targetTestDir: "fps/complete_orig",
+			targetDir:     "/Engine/Config",
+			targetFile:    "/BaseEngine.ini",
 			cfg: &config.Config{
-				Path: "./modifiers/internal/testdata/complete_orig" + topLevel + binariesDir,
+				Path: baseDir + "fps/complete_orig" + topLevel + binariesDir,
 				FrameRate: &config.FrameRateConfig{
 					MinRate:      60,
 					MaxRate:      300,
@@ -68,10 +70,12 @@ func TestProcessor_Run(t *testing.T) {
 			},
 		},
 		{
-			name:      "Original/Short",
-			targetDir: "short_orig",
+			name:          "Original/Short",
+			targetTestDir: "fps/short_orig",
+			targetDir:     "/Engine/Config",
+			targetFile:    "/BaseEngine.ini",
 			cfg: &config.Config{
-				Path: "./modifiers/internal/testdata/short_orig" + topLevel + binariesDir,
+				Path: baseDir + "fps/short_orig" + topLevel + binariesDir,
 				FrameRate: &config.FrameRateConfig{
 					MinRate:      60,
 					MaxRate:      300,
@@ -80,10 +84,12 @@ func TestProcessor_Run(t *testing.T) {
 			},
 		},
 		{
-			name:      "Fail/InvalidPath",
-			targetDir: "short_orig",
+			name:          "Fail/InvalidPath",
+			targetTestDir: "fps/short_orig",
+			targetDir:     "/Engine/Config",
+			targetFile:    "/BaseEngine.ini",
 			cfg: &config.Config{
-				Path: "./modifiers/internal/testdata/test_fake",
+				Path: baseDir + "fps/short_fake",
 				FrameRate: &config.FrameRateConfig{
 					MinRate:      60,
 					MaxRate:      300,
@@ -92,11 +98,35 @@ func TestProcessor_Run(t *testing.T) {
 			},
 			err: processor.ErrInvalidPath,
 		},
+		{
+			name:          "Sprint/Original/Complete",
+			targetTestDir: "sprint/complete_orig",
+			targetDir:     "/APBGame/Config",
+			targetFile:    "/DefaultInput.ini",
+			cfg: &config.Config{
+				Path: baseDir + "sprint/complete_orig" + topLevel + binariesDir,
+				Input: &config.InputConfig{
+					SprintLock: true,
+				},
+			},
+		},
+		{
+			name:          "Crouch/Original/Complete",
+			targetTestDir: "crouch/complete_orig",
+			targetDir:     "/APBGame/Config",
+			targetFile:    "/DefaultInput.ini",
+			cfg: &config.Config{
+				Path: baseDir + "crouch/complete_orig" + topLevel + binariesDir,
+				Input: &config.InputConfig{
+					CrouchHold: true,
+				},
+			},
+		},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			fs := &testFS{
-				basePath: baseDir + testcase.targetDir + topLevel,
-				filePath: defaultTarget + filename,
+				basePath: baseDir + testcase.targetTestDir + topLevel,
+				filePath: testcase.targetDir + testcase.targetFile,
 			}
 
 			data, err := os.ReadFile(fs.basePath + fs.filePath)
@@ -116,7 +146,7 @@ func TestProcessor_Run(t *testing.T) {
 			data, err = os.ReadFile(fs.basePath + fs.filePath)
 			require.NoError(t, err)
 
-			wants, err := os.ReadFile(baseDir + testcase.targetDir + resultsDir + filename)
+			wants, err := os.ReadFile(baseDir + testcase.targetTestDir + resultsDir + testcase.targetFile)
 			require.NoError(t, err)
 			require.Equal(t, wants, data)
 		})
