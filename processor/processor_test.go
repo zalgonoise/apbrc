@@ -1,15 +1,19 @@
 package processor_test
 
 import (
+	"context"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/zalgonoise/logx"
-	"github.com/zalgonoise/logx/handlers/texth"
+	"golang.org/x/exp/slog"
 
 	"github.com/zalgonoise/apbrc/config"
+	"github.com/zalgonoise/apbrc/monitoring"
 	"github.com/zalgonoise/apbrc/processor"
+	"github.com/zalgonoise/apbrc/processor/modifiers"
+	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
+	"github.com/zalgonoise/apbrc/processor/modifiers/input"
 )
 
 type testFS struct {
@@ -38,13 +42,32 @@ func (fs *testFS) Rollback() error {
 	return nil
 }
 
+func initMods(cfg *config.Config, logger monitoring.Logger) []processor.Applier {
+	mods := make([]processor.Applier, 0, 2)
+
+	if cfg.FrameRate != nil {
+		mods = append(mods, modifiers.ModifierWithLogs(
+			engine.FrameRate(*cfg.FrameRate),
+			logger,
+		))
+	}
+
+	if cfg.Input != nil {
+		mods = append(mods, modifiers.ModifierWithLogs(
+			input.Input(*cfg.Input),
+			logger,
+		))
+	}
+
+	return mods
+}
+
 func TestProcessor_Run(t *testing.T) {
 	var (
 		baseDir     = "./modifiers/internal/testdata/"
 		resultsDir  = "/results"
 		binariesDir = "/Binaries"
 		topLevel    = "/APB Reloaded"
-		logger      = logx.New(texth.New(os.Stderr))
 	)
 
 	for _, testcase := range []struct {
@@ -124,6 +147,10 @@ func TestProcessor_Run(t *testing.T) {
 		},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
+			ctx := context.Background()
+			logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+				AddSource: true,
+			}))
 			fs := &testFS{
 				basePath: baseDir + testcase.targetTestDir + topLevel,
 				filePath: testcase.targetDir + testcase.targetFile,
@@ -135,9 +162,11 @@ func TestProcessor_Run(t *testing.T) {
 			fs.origData = data
 			defer fs.Rollback()
 
-			proc := processor.New(testcase.cfg, logger)
+			mods := initMods(testcase.cfg, logger)
+			proc := processor.ProcessorWithLogs(processor.New(testcase.cfg, mods...), logger)
+			require.NotNil(t, proc)
 
-			if err = proc.Run(); err != nil {
+			if err = proc.Run(ctx); err != nil {
 				require.ErrorIs(t, err, testcase.err)
 
 				return
