@@ -1,80 +1,60 @@
 package processor
 
 import (
+	"context"
+	"fmt"
 	"strings"
 
-	"github.com/zalgonoise/logx"
-
 	"github.com/zalgonoise/apbrc/config"
-	"github.com/zalgonoise/apbrc/processor/modifiers"
 )
 
 const (
 	topLevelFolder = "APB Reloaded"
 )
 
-// Modifier is a type that applies changes to configuration files
-type Modifier interface {
+// Applier is a type that applies changes to configuration files
+type Applier interface {
 	// Apply modifies the configuration file on `basePath` path, returning an error if raised
-	Apply(basePath string) error
+	Apply(ctx context.Context, basePath string) error
 }
 
-// Processor applies a (set of) Modifier to a (set of) configuration file(s), under a fixed base path
+// Processor applies a (set of) Applier to a (set of) configuration file(s), under a fixed base path
 type Processor struct {
 	basePath string
 
 	cfg       *config.Config
-	modifiers []Modifier
-	logger    logx.Logger
+	modifiers []Applier
 }
 
 // New creates a Processor from the input config.Config, and logx.Logger
-func New(cfg *config.Config, logger logx.Logger) *Processor {
-	if cfg == nil {
+func New(cfg *config.Config, mods ...Applier) *Processor {
+	if cfg == nil || mods == nil {
 		return nil
-	}
-
-	mods := make([]Modifier, 0)
-
-	if cfg.FrameRate != nil {
-		mods = append(mods,
-			modifiers.NewFPSModifier(cfg.FrameRate.MinRate, cfg.FrameRate.MaxRate, cfg.FrameRate.SmoothedRate, logger),
-		)
-	}
-
-	if cfg.Input != nil {
-		mods = append(mods,
-			modifiers.NewSprintLockModifier(cfg.Input.SprintLock, logger),
-			modifiers.NewCrouchLockModifier(cfg.Input.CrouchHold, logger),
-		)
 	}
 
 	return &Processor{
 		cfg:       cfg,
 		modifiers: mods,
-		logger:    logger,
 	}
 }
 
-// Run executes the processor, applying all configured Modifier. It returns an error if raised, on an invalid base path
-// or on the first Modifier-returned error
-func (p *Processor) Run() error {
+// Run executes the processor, applying all configured Applier. It returns an error if raised, on an invalid base path
+// or on the first Applier-returned error
+func (p *Processor) Run(ctx context.Context) error {
 	if p.basePath == "" {
 		dir, ok := topLevel(p.cfg.Path)
 		if !ok {
-			return ErrInvalidPath
+			return fmt.Errorf("%w: scanning top-level folder from: %s", ErrInvalidPath, p.cfg.Path)
 		}
 
 		p.basePath = dir
 	}
 
 	for i := range p.modifiers {
-		if err := p.modifiers[i].Apply(p.basePath); err != nil {
+		if err := p.modifiers[i].Apply(ctx, p.basePath); err != nil {
 			return err
 		}
 	}
-
-	p.logger.Info("processor executed successfully")
 
 	return nil
 }
