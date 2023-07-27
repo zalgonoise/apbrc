@@ -21,6 +21,7 @@ type FrameRateConfig struct {
 type InputConfig struct {
 	SprintLock bool
 	CrouchHold bool
+	Reset      bool
 }
 
 func newInputConfig(lockSprint, holdCrouch, reset bool) *InputConfig {
