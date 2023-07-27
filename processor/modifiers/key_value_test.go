@@ -1,15 +1,17 @@
 package modifiers_test
 
 import (
+	"context"
 	"os"
+	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/zalgonoise/logx"
-	"github.com/zalgonoise/logx/handlers/texth"
 
-	"github.com/zalgonoise/apbrc/processor"
+	"github.com/zalgonoise/apbrc/config"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
+	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
+	"github.com/zalgonoise/apbrc/processor/modifiers/input"
 )
 
 type testFS struct {
@@ -43,52 +45,64 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 		baseDir           = "./internal/testdata/"
 		resultsDir        = "/results"
 		topLevel          = "/APB Reloaded"
-		fpsModifierFormat = "%s=%d\r\n"
-		logger            = logx.New(texth.New(os.Stderr))
+		fpsModifierFormat = "%s=%d"
+		lf                = "\n"
 	)
+
+	if runtime.GOOS == "windows" {
+		lf = "\r\n"
+	}
 
 	for _, testcase := range []struct {
 		name          string
 		targetTestDir string
 		targetDir     string
 		targetFile    string
-		modifier      processor.Modifier
+		modifier      modifiers.Applier
 	}{
 		{
 			name:          "FPSModifier/Original/Complete",
 			targetTestDir: "fps/complete_orig",
 			targetDir:     "/Engine/Config",
 			targetFile:    "/BaseEngine.ini",
-			modifier:      modifiers.NewFPSModifier(60, 300, 300, logger),
+			modifier: engine.FrameRate(config.FrameRateConfig{
+				MinRate:      60,
+				MaxRate:      300,
+				SmoothedRate: 300,
+			}),
 		},
 		{
 			name:          "FPSModifier/Original/Short",
 			targetTestDir: "fps/short_orig",
 			targetDir:     "/Engine/Config",
 			targetFile:    "/BaseEngine.ini",
-			modifier:      modifiers.NewFPSModifier(60, 300, 300, logger),
+			modifier: engine.FrameRate(config.FrameRateConfig{
+				MinRate:      60,
+				MaxRate:      300,
+				SmoothedRate: 300,
+			}),
 		},
 		{
 			name:          "FPSModifier/Fake",
 			targetTestDir: "fps/short_fake",
 			targetDir:     "/Engine/Config",
 			targetFile:    "/BaseEngine.ini",
-			modifier: modifiers.NewKeyValueModifier(
-				"/Engine/Config/BaseEngine.ini", logger,
+			modifier: modifiers.NewModifier(
+				"/Engine/Config/BaseEngine.ini",
 				modifiers.KeyValue[int]{
 					Key:    "SomeAttributeKey",
-					Value:  600,
-					Format: fpsModifierFormat,
+					Data:   600,
+					Format: fpsModifierFormat + lf,
 				},
 				modifiers.KeyValue[int]{
 					Key:    "OtherAttributeKey",
-					Value:  700,
-					Format: fpsModifierFormat,
+					Data:   700,
+					Format: fpsModifierFormat + lf,
 				},
 				modifiers.KeyValue[int]{
 					Key:    "LastAttributeKey",
-					Value:  800,
-					Format: fpsModifierFormat,
+					Data:   800,
+					Format: fpsModifierFormat + lf,
 				},
 			),
 		},
@@ -97,17 +111,22 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			targetTestDir: "sprint/complete_orig",
 			targetDir:     "/APBGame/Config",
 			targetFile:    "/DefaultInput.ini",
-			modifier:      modifiers.NewSprintLockModifier(true, logger),
+			modifier: input.Input(config.InputConfig{
+				SprintLock: true,
+			}),
 		},
 		{
 			name:          "CrouchLock/Original/Complete",
 			targetTestDir: "crouch/complete_orig",
 			targetDir:     "/APBGame/Config",
 			targetFile:    "/DefaultInput.ini",
-			modifier:      modifiers.NewCrouchLockModifier(true, logger),
+			modifier: input.Input(config.InputConfig{
+				CrouchHold: true,
+			}),
 		},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
+			ctx := context.Background()
 			fs := &testFS{
 				basePath: baseDir + testcase.targetTestDir + topLevel,
 				filePath: testcase.targetDir + testcase.targetFile,
@@ -120,7 +139,7 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			defer fs.Rollback()
 
 			path := baseDir + testcase.targetTestDir + topLevel
-			err = testcase.modifier.Apply(path)
+			err = testcase.modifier.Apply(ctx, path)
 			require.NoError(t, err)
 
 			data, err = os.ReadFile(fs.basePath + fs.filePath)
