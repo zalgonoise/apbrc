@@ -86,9 +86,9 @@ func TestProcessor_Run(t *testing.T) {
 			cfg: &config.Config{
 				Path: baseDir + "fps/complete_orig" + topLevel + binariesDir,
 				FrameRate: &config.FrameRateConfig{
-					MinRate:      60,
-					MaxRate:      300,
-					SmoothedRate: 300,
+					Cap: 300,
+					Min: 60,
+					Max: 300,
 				},
 			},
 		},
@@ -100,9 +100,9 @@ func TestProcessor_Run(t *testing.T) {
 			cfg: &config.Config{
 				Path: baseDir + "fps/short_orig" + topLevel + binariesDir,
 				FrameRate: &config.FrameRateConfig{
-					MinRate:      60,
-					MaxRate:      300,
-					SmoothedRate: 300,
+					Cap: 300,
+					Min: 60,
+					Max: 300,
 				},
 			},
 		},
@@ -114,9 +114,9 @@ func TestProcessor_Run(t *testing.T) {
 			cfg: &config.Config{
 				Path: baseDir + "fps/short_fake",
 				FrameRate: &config.FrameRateConfig{
-					MinRate:      60,
-					MaxRate:      300,
-					SmoothedRate: 300,
+					Cap: 300,
+					Min: 60,
+					Max: 300,
 				},
 			},
 			err: processor.ErrInvalidPath,
