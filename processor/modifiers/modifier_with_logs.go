@@ -31,7 +31,7 @@ type modifierWithLogs struct {
 }
 
 func (m modifierWithLogs) Apply(ctx context.Context, basePath string) error {
-	path := m.m.FilePath + basePath
+	path := basePath + m.m.FilePath
 
 	m.logger.InfoContext(ctx,
 		"applying modifiers to config file",
