@@ -13,9 +13,9 @@ type Config struct {
 }
 
 type FrameRateConfig struct {
-	MaxRate      int
-	MinRate      int
-	SmoothedRate int
+	Cap int
+	Min int
+	Max int
 }
 
 type InputConfig struct {
@@ -24,28 +24,16 @@ type InputConfig struct {
 	Reset      bool
 }
 
-func newInputConfig(lockSprint, holdCrouch, reset bool) *InputConfig {
-	if reset {
-		return &InputConfig{}
-	}
-
-	if !lockSprint && !holdCrouch {
-		return nil
-	}
-
-	return &InputConfig{
-		SprintLock: lockSprint,
-		CrouchHold: holdCrouch,
-	}
-}
-
 func NewConfig() (*Config, error) {
 	path := flag.String("dir", "", "path to the game's installation folder")
 
 	// frame rate options
-	min := flag.Int("min", 60, "min frame rate value to set")
-	max := flag.Int("max", 300, "max frame rate value to set")
-	smoothed := flag.Int("smoothed", 300, "smoothed frame rate value to set")
+	frameRateCap := flag.Int("frameRateCap", 300,
+		"frame rate limit value to set when the Smoothed frame rate option is disabled")
+	frameRateMin := flag.Int("frameRateMin", 60,
+		"minimum frame rate value to set when the Smoothed frame rate option is enabled")
+	frameRateMax := flag.Int("frameRateCap", 300,
+		"maximum frame rate value to set when the Smoothed frame rate option is enabled")
 
 	// input options
 	lockSprint := flag.Bool("lock-sprint", false,
@@ -73,10 +61,25 @@ func NewConfig() (*Config, error) {
 	return &Config{
 		Path: *path,
 		FrameRate: &FrameRateConfig{
-			MinRate:      *min,
-			MaxRate:      *max,
-			SmoothedRate: *smoothed,
+			Min: *frameRateMin,
+			Cap: *frameRateCap,
+			Max: *frameRateMax,
 		},
 		Input: newInputConfig(*lockSprint, *holdCrouch, *resetInput),
 	}, nil
+}
+
+func newInputConfig(lockSprint, holdCrouch, reset bool) *InputConfig {
+	if reset {
+		return &InputConfig{}
+	}
+
+	if !lockSprint && !holdCrouch {
+		return nil
+	}
+
+	return &InputConfig{
+		SprintLock: lockSprint,
+		CrouchHold: holdCrouch,
+	}
 }
