@@ -66,9 +66,9 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			targetDir:     "/Engine/Config",
 			targetFile:    "/BaseEngine.ini",
 			modifier: engine.FrameRate(config.FrameRateConfig{
-				MinRate:      60,
-				MaxRate:      300,
-				SmoothedRate: 300,
+				Cap: 300,
+				Min: 60,
+				Max: 300,
 			}),
 		},
 		{
@@ -77,9 +77,9 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			targetDir:     "/Engine/Config",
 			targetFile:    "/BaseEngine.ini",
 			modifier: engine.FrameRate(config.FrameRateConfig{
-				MinRate:      60,
-				MaxRate:      300,
-				SmoothedRate: 300,
+				Cap: 300,
+				Min: 60,
+				Max: 300,
 			}),
 		},
 		{
