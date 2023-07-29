@@ -65,7 +65,7 @@ _____________
 The modifiers are configurable and the application can be further extended to have more features and functionalities. 
 Below is a list of the supported modifiers
 
-#### [Frame Rate Modifier](./processor/modifiers/fps.go)
+#### [Frame Rate Modifier](./processor/modifiers/engine/fps.go)
 
 This modifier changes the limits for the frame rate limiters. Below are the configuration values that change this
 behavior:
@@ -79,19 +79,25 @@ __Target__: `\Engine\Config\BaseEngine.ini`
 |  `MaxClientFrameRate`  |   128   |     Changes the game client's maximum frame rate when the `Smoothed` option is unset     |
 
 
-Below are the configuration flags that modify these values
+Below are the configuration flags that modify these values, alongside their default values applied when you don't use
+or specify that configuration option and value.
 
-|    Flag     | Type  | Default |           Description            |
-|:-----------:|:-----:|:-------:|:--------------------------------:|
-|   `-min`    | `int` |   60    | Minimum frame rate value to set  |
-|   `-max`    | `int` |   60    | Maximum frame rate value to set  |
-| `-smoothed` | `int` |   60    | Smoothed frame rate value to set |
+|  Flag  | Type  | Default |                                  Description                                   |
+|:------:|:-----:|:-------:|:------------------------------------------------------------------------------:|
+| `-cap` | `int` |   300   |       Frame rate limit value to set when the Smoothed option is disabled       |
+| `-min` | `int` |   60    | Minimum frame rate value to set when the Smoothed frame rate option is enabled |
+| `-max` | `int` |   300   | Maximum frame rate value to set when the Smoothed frame rate option is enabled |
 
 
-#### [Input Bindings Modifiers](./processor/modifiers/sprint_lock.go)
+#### [Input Bindings Modifiers](./processor/modifiers/input)
 
-This modifier changes the behavior of the Sprint action, causing it to toggle __off__ when held down, which is the 
-opposite behavior of the key. It allows to always sprint without holding the assigned key for it.
+These modifiers change the behavior of the Sprint and Crouch actions.
+
+[Sprint lock](./processor/modifiers/input/sprint_lock.go) causes it to toggle __off__ when held down, which is the opposite behavior of the key. It allows to always 
+sprint without holding the assigned key for it.
+
+[Crouch lock](./processor/modifiers/input/crouch_lock.go) causes it to behave as a press-and-hold key; instead of an on-off switch. It can be still locked in crouch 
+mode by combining the crouch key and hitting the jump key, for instance, and unlocked by pressing the jump key again.
 
 __Target__: `\APBGame\Config\DefaultInput.ini`
 
