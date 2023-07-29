@@ -9,20 +9,20 @@ import (
 )
 
 const (
-	minRateKey      = "MinSmoothedFrameRate"
-	smoothedRateKey = "MaxSmoothedFrameRate"
-	maxRateKey      = "MaxClientFrameRate"
+	frameRateCapKey = "MaxClientFrameRate"
+	frameRateMinKey = "MinSmoothedFrameRate"
+	frameRateMaxKey = "MaxSmoothedFrameRate"
 
-	defaultMinRate      = 22
-	defaultMaxRate      = 128
-	defaultSmoothedRate = 100
+	defaultFrameRateCap = 128
+	defaultFrameRateMin = 22
+	defaultFrameRateMax = 100
 
 	fpsModifierPath   = `/Engine/Config/BaseEngine.ini`
 	fpsModifierFormat = "%s=%d"
 )
 
-// FrameRate creates a new frame-rate Modifier, which will change the min, max and smoothed frame rate
-// configuration values
+// FrameRate creates a new frame-rate Modifier, which affects the engine's configuration for frame rate;
+// updating its smoothed minimum and maximum frame rates, as well as the frame rate cap.
 func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
 	sb := &strings.Builder{}
 	sb.WriteString(fpsModifierFormat)
@@ -34,26 +34,26 @@ func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
 
 	mods := make([]modifiers.Attribute, 0, 3)
 
-	if cfg.MinRate > 0 && cfg.MinRate != defaultMinRate {
+	if cfg.Cap > 0 && cfg.Cap != defaultFrameRateCap {
 		mods = append(mods, modifiers.KeyValue[int]{
-			Key:    minRateKey,
-			Data:   cfg.MinRate,
+			Key:    frameRateCapKey,
+			Data:   cfg.Cap,
 			Format: sb.String(),
 		})
 	}
 
-	if cfg.MaxRate > 0 && cfg.MaxRate != defaultMaxRate {
+	if cfg.Min > 0 && cfg.Min != defaultFrameRateMin {
 		mods = append(mods, modifiers.KeyValue[int]{
-			Key:    maxRateKey,
-			Data:   cfg.MaxRate,
+			Key:    frameRateMinKey,
+			Data:   cfg.Min,
 			Format: sb.String(),
 		})
 	}
 
-	if cfg.SmoothedRate > 0 && cfg.SmoothedRate != defaultSmoothedRate {
+	if cfg.Max > 0 && cfg.Max != defaultFrameRateMax {
 		mods = append(mods, modifiers.KeyValue[int]{
-			Key:    smoothedRateKey,
-			Data:   cfg.SmoothedRate,
+			Key:    frameRateMaxKey,
+			Data:   cfg.Max,
 			Format: sb.String(),
 		})
 	}
