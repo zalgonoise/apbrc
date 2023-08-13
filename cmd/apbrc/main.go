@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"os"
 
-	"golang.org/x/exp/slog"
-
 	"github.com/zalgonoise/apbrc/config"
-	"github.com/zalgonoise/apbrc/monitoring"
+	"github.com/zalgonoise/apbrc/log"
 	"github.com/zalgonoise/apbrc/processor"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
@@ -31,9 +30,12 @@ func run() (err error, code int) {
 		return err, 1
 	}
 
-	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-		AddSource: true,
-	}))
+	logger := slog.New(log.NewSpanContextHandler(
+		log.WithHandler(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
+			AddSource: true,
+		})),
+		log.WithSpanID(),
+	))
 
 	mods := initMods(cfg, logger)
 
@@ -46,7 +48,7 @@ func run() (err error, code int) {
 	return nil, 0
 }
 
-func initMods(cfg *config.Config, logger monitoring.Logger) []processor.Applier {
+func initMods(cfg *config.Config, logger log.Logger) []processor.Applier {
 	mods := make([]processor.Applier, 0, 2)
 
 	if cfg.FrameRate != nil {
