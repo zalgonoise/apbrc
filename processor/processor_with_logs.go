@@ -2,10 +2,9 @@ package processor
 
 import (
 	"context"
+	"log/slog"
 
-	"golang.org/x/exp/slog"
-
-	"github.com/zalgonoise/apbrc/monitoring"
+	"github.com/zalgonoise/apbrc/log"
 )
 
 type Runner interface {
@@ -14,7 +13,7 @@ type Runner interface {
 
 type processorWithLogs struct {
 	r      Runner
-	logger monitoring.Logger
+	logger log.Logger
 }
 
 func (p processorWithLogs) Run(ctx context.Context) error {
@@ -33,6 +32,6 @@ func (p processorWithLogs) Run(ctx context.Context) error {
 	return nil
 }
 
-func ProcessorWithLogs(r Runner, logger monitoring.Logger) Runner {
+func ProcessorWithLogs(r Runner, logger log.Logger) Runner {
 	return processorWithLogs{r, logger}
 }

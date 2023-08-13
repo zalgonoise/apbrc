@@ -6,10 +6,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/zalgonoise/apbrc/log"
 	"golang.org/x/exp/slog"
 
 	"github.com/zalgonoise/apbrc/config"
-	"github.com/zalgonoise/apbrc/monitoring"
 	"github.com/zalgonoise/apbrc/processor"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
@@ -42,7 +42,7 @@ func (fs *testFS) Rollback() error {
 	return nil
 }
 
-func initMods(cfg *config.Config, logger monitoring.Logger) []processor.Applier {
+func initMods(cfg *config.Config, logger log.Logger) []processor.Applier {
 	mods := make([]processor.Applier, 0, 2)
 
 	if cfg.FrameRate != nil {
