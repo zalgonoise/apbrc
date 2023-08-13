@@ -3,16 +3,15 @@ package modifiers
 import (
 	"context"
 
+	"github.com/zalgonoise/apbrc/log"
 	"golang.org/x/exp/slog"
-
-	"github.com/zalgonoise/apbrc/monitoring"
 )
 
 type Applier interface {
 	Apply(ctx context.Context, basePath string) error
 }
 
-func ModifierWithLogs(m Modifier, logger monitoring.Logger) Applier {
+func ModifierWithLogs(m Modifier, logger log.Logger) Applier {
 	if logger == nil {
 		return m
 	}
@@ -27,7 +26,7 @@ func ModifierWithLogs(m Modifier, logger monitoring.Logger) Applier {
 
 type modifierWithLogs struct {
 	m      Modifier
-	logger monitoring.Logger
+	logger log.Logger
 }
 
 func (m modifierWithLogs) Apply(ctx context.Context, basePath string) error {

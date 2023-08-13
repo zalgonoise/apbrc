@@ -3,18 +3,17 @@ package modifiers
 import (
 	"context"
 
+	"github.com/zalgonoise/apbrc/log"
 	"golang.org/x/exp/slog"
-
-	"github.com/zalgonoise/apbrc/monitoring"
 )
 
-func AttributeWithLogs(a Attribute, logger monitoring.Logger) Attribute {
+func AttributeWithLogs(a Attribute, logger log.Logger) Attribute {
 	return attributeWithLogs{a, logger}
 }
 
 type attributeWithLogs struct {
 	a      Attribute
-	logger monitoring.Logger
+	logger log.Logger
 }
 
 func (a attributeWithLogs) Match(ctx context.Context, line []byte) (ok bool, match string) {
