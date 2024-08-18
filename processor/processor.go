@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"fmt"
+	"github.com/zalgonoise/x/errs"
 	"strings"
 
 	"github.com/zalgonoise/apbrc/config"
@@ -10,6 +11,18 @@ import (
 
 const (
 	topLevelFolder = "APB Reloaded"
+)
+
+const (
+	unlockerDomain = errs.Domain("apbrc/processor")
+
+	ErrInvalid = errs.Kind("invalid")
+
+	ErrPath = errs.Entity("path")
+)
+
+var (
+	ErrInvalidPath = errs.New(unlockerDomain, ErrInvalid, ErrPath)
 )
 
 // Applier is a type that applies changes to configuration files
