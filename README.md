@@ -84,9 +84,9 @@ or specify that configuration option and value.
 
 |  Flag  | Type  | Default |                                  Description                                   |
 |:------:|:-----:|:-------:|:------------------------------------------------------------------------------:|
-| `-cap` | `int` |   300   |       Frame rate limit value to set when the Smoothed option is disabled       |
-| `-min` | `int` |   60    | Minimum frame rate value to set when the Smoothed frame rate option is enabled |
-| `-max` | `int` |   300   | Maximum frame rate value to set when the Smoothed frame rate option is enabled |
+| `-cap` | `int` |    0    |       Frame rate limit value to set when the Smoothed option is disabled       |
+| `-min` | `int` |   22    | Minimum frame rate value to set when the Smoothed frame rate option is enabled |
+| `-max` | `int` |   128   | Maximum frame rate value to set when the Smoothed frame rate option is enabled |
 
 
 #### [Input Bindings Modifiers](./processor/modifiers/input)
