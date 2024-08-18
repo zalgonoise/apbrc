@@ -28,11 +28,11 @@ func NewConfig() (*Config, error) {
 	path := flag.String("dir", "", "path to the game's installation folder")
 
 	// frame rate options
-	frameRateCap := flag.Int("frameRateCap", 300,
+	frameRateCap := flag.Int("frameRateCap", 0,
 		"frame rate limit value to set when the Smoothed frame rate option is disabled")
-	frameRateMin := flag.Int("frameRateMin", 60,
+	frameRateMin := flag.Int("frameRateMin", 22,
 		"minimum frame rate value to set when the Smoothed frame rate option is enabled")
-	frameRateMax := flag.Int("frameRateCap", 300,
+	frameRateMax := flag.Int("frameRateCap", 128,
 		"maximum frame rate value to set when the Smoothed frame rate option is enabled")
 
 	// input options
