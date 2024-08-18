@@ -21,7 +21,7 @@ type Modifier struct {
 	Attributes []Attribute
 }
 
-// NewModifier creates a Modifier of type T, configured with `filePath` as a base path, a logx.Logger,
+// NewModifier creates a Modifier of type T, configured with `filePath` as a base path,
 // and any number of KeyValue modifiers
 func NewModifier(filePath string, attributes ...Attribute) Modifier {
 	return Modifier{
