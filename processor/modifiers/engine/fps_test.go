@@ -61,14 +61,40 @@ func TestNewFPSModifier(t *testing.T) {
 						Data:   300,
 						Format: fpsModifierFormat + lf,
 					},
+					modifiers.KeyValue[int]{
+						Key:    frameRateMinKey,
+						Data:   0,
+						Format: fpsModifierFormat + lf,
+					},
+					modifiers.KeyValue[int]{
+						Key:    frameRateMaxKey,
+						Data:   0,
+						Format: fpsModifierFormat + lf,
+					},
 				},
 			},
 		},
 		{
 			name: "Success/None",
 			wants: modifiers.Modifier{
-				FilePath:   fpsModifierPath,
-				Attributes: []modifiers.Attribute{},
+				FilePath: fpsModifierPath,
+				Attributes: []modifiers.Attribute{
+					modifiers.KeyValue[int]{
+						Key:    frameRateCapKey,
+						Data:   0,
+						Format: fpsModifierFormat + lf,
+					},
+					modifiers.KeyValue[int]{
+						Key:    frameRateMinKey,
+						Data:   0,
+						Format: fpsModifierFormat + lf,
+					},
+					modifiers.KeyValue[int]{
+						Key:    frameRateMaxKey,
+						Data:   0,
+						Format: fpsModifierFormat + lf,
+					},
+				},
 			},
 		},
 	} {

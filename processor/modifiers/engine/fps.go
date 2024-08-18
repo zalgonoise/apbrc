@@ -13,7 +13,7 @@ const (
 	frameRateMinKey = "MinSmoothedFrameRate"
 	frameRateMaxKey = "MaxSmoothedFrameRate"
 
-	defaultFrameRateCap = 0
+	defaultFrameRateCap = 100
 	defaultFrameRateMin = 22
 	defaultFrameRateMax = 128
 
@@ -34,7 +34,7 @@ func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
 
 	mods := make([]modifiers.Attribute, 0, 3)
 
-	if cfg.Cap > 0 && cfg.Cap != defaultFrameRateCap {
+	if cfg.Cap >= 0 && cfg.Cap != defaultFrameRateCap {
 		mods = append(mods, modifiers.KeyValue[int]{
 			Key:    frameRateCapKey,
 			Data:   cfg.Cap,
@@ -42,7 +42,7 @@ func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
 		})
 	}
 
-	if cfg.Min > 0 && cfg.Min != defaultFrameRateMin {
+	if cfg.Min >= 0 && cfg.Min != defaultFrameRateMin {
 		mods = append(mods, modifiers.KeyValue[int]{
 			Key:    frameRateMinKey,
 			Data:   cfg.Min,
@@ -50,7 +50,7 @@ func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
 		})
 	}
 
-	if cfg.Max > 0 && cfg.Max != defaultFrameRateMax {
+	if cfg.Max >= 0 && cfg.Max != defaultFrameRateMax {
 		mods = append(mods, modifiers.KeyValue[int]{
 			Key:    frameRateMaxKey,
 			Data:   cfg.Max,
