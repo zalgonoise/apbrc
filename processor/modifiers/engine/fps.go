@@ -13,9 +13,9 @@ const (
 	frameRateMinKey = "MinSmoothedFrameRate"
 	frameRateMaxKey = "MaxSmoothedFrameRate"
 
-	defaultFrameRateCap = 128
+	defaultFrameRateCap = 0
 	defaultFrameRateMin = 22
-	defaultFrameRateMax = 100
+	defaultFrameRateMax = 128
 
 	fpsModifierPath   = `/Engine/Config/BaseEngine.ini`
 	fpsModifierFormat = "%s=%d"
