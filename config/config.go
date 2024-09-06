@@ -1,30 +1,77 @@
 package config
 
 import (
+	"errors"
 	"flag"
+	"io"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	Path string
+var ErrNoFileConfig = errors.New("no file config")
 
-	FrameRate *FrameRateConfig
-	Input     *InputConfig
+type Config struct {
+	Path string `yaml:"path"`
+
+	FrameRate *FrameRateConfig `yaml:"frame_rate"`
+	Input     *InputConfig     `json:"input"`
 }
 
 type FrameRateConfig struct {
-	Cap int
-	Min int
-	Max int
+	Cap int `yaml:"cap"`
+	Min int `yaml:"min"`
+	Max int `yaml:"max"`
 }
 
 type InputConfig struct {
-	SprintLock bool
-	CrouchHold bool
-	Reset      bool
+	SprintLock bool `yaml:"sprint_lock"`
+	CrouchHold bool `yaml:"crouch_hold"`
+	Reset      bool `yaml:"reset"`
+}
+
+func NewConfigFromFile() (*Config, error) {
+	f, err := os.OpenFile("config.yaml", os.O_RDONLY, 0600)
+
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, ErrNoFileConfig
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer f.Close()
+
+	buf, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return readConfigFile(buf)
+}
+
+func readConfigFile(buf []byte) (*Config, error) {
+	config := &Config{}
+
+	if err := yaml.Unmarshal(buf, &config); err != nil {
+		return nil, err
+	}
+
+	return config, nil
 }
 
 func NewConfig() (*Config, error) {
+	config, err := NewConfigFromFile()
+
+	if err == nil {
+		return config, nil
+	}
+
+	if !errors.Is(err, ErrNoFileConfig) {
+		return nil, err
+	}
+
 	path := flag.String("dir", "", "path to the game's installation folder")
 
 	// frame rate options
