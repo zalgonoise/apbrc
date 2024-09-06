@@ -58,6 +58,15 @@ func readConfigFile(buf []byte) (*Config, error) {
 		return nil, err
 	}
 
+	if config.Path == "" {
+		currentPath, err := os.Getwd()
+		if err != nil {
+			return nil, err
+		}
+
+		config.Path = currentPath
+	}
+
 	return config, nil
 }
 
