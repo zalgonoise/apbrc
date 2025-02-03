@@ -16,10 +16,10 @@ import (
 	"time"
 )
 
-var modes = []string{"apply", "check", ""}
+var modes = []string{"", "apply", "check"}
 
 func main() {
-	runner := cli.NewRunner("icecloset",
+	runner := cli.NewRunner("apbrc",
 		cli.WithOneOf(modes...),
 		cli.WithExecutors(map[string]cli.Executor{
 			"":      cli.Executable(ExecApply),
