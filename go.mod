@@ -6,7 +6,7 @@ toolchain go1.23.3
 
 require (
 	github.com/stretchr/testify v1.10.0
-	github.com/zalgonoise/x/cli v0.0.0-20250203160133-00bdc617d3a7
+	github.com/zalgonoise/x/cli v0.0.0-20250203224640-c50c298f7819
 	github.com/zalgonoise/x/errs v0.0.0-20250203160133-00bdc617d3a7
 	go.opentelemetry.io/otel/trace v1.34.0
 	golang.org/x/exp v0.0.0-20250128182459-e0ece0dbea4c
