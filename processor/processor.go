@@ -22,7 +22,7 @@ const (
 )
 
 var (
-	ErrInvalidPath = errs.New(unlockerDomain, ErrInvalid, ErrPath)
+	ErrInvalidPath = errs.WithDomain(unlockerDomain, ErrInvalid, ErrPath)
 )
 
 // Applier is a type that applies changes to configuration files
