@@ -70,7 +70,7 @@ func readConfigFile(buf []byte) (*Config, error) {
 	return config, nil
 }
 
-func NewConfig() (*Config, error) {
+func NewConfig(args []string) (*Config, error) {
 	config, err := NewConfigFromFile()
 
 	if err == nil {
@@ -81,28 +81,32 @@ func NewConfig() (*Config, error) {
 		return nil, err
 	}
 
-	path := flag.String("dir", "", "path to the game's installation folder")
+	fs := flag.NewFlagSet("apply", flag.ExitOnError)
+
+	path := fs.String("dir", "", "path to the game's installation folder")
 
 	// frame rate options
-	frameRateCap := flag.Int("cap", 0,
+	frameRateCap := fs.Int("cap", 0,
 		"frame rate limit value to set when the Smoothed frame rate option is disabled")
-	frameRateMin := flag.Int("min", 22,
+	frameRateMin := fs.Int("min", 22,
 		"minimum frame rate value to set when the Smoothed frame rate option is enabled")
-	frameRateMax := flag.Int("max", 128,
+	frameRateMax := fs.Int("max", 128,
 		"maximum frame rate value to set when the Smoothed frame rate option is enabled")
 
 	// input options
-	lockSprint := flag.Bool("lock-sprint", false,
+	lockSprint := fs.Bool("lock-sprint", false,
 		"changes the sprint input configuration to always sprint (lock sprint action)",
 	)
-	holdCrouch := flag.Bool("hold-crouch", false,
+	holdCrouch := fs.Bool("hold-crouch", false,
 		"changes the crouch input configuration to act as a press-and-hold key (crouch unlock action)",
 	)
-	resetInput := flag.Bool("reset-input", false,
+	resetInput := fs.Bool("reset-input", false,
 		"returns any input bindings changes back to their default configuration",
 	)
 
-	flag.Parse()
+	if err := fs.Parse(args); err != nil {
+		return nil, err
+	}
 
 	// use working directory if path is unset
 	if *path == "" {
