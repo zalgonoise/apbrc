@@ -1,17 +1,21 @@
 module github.com/zalgonoise/apbrc
 
-go 1.21
+go 1.22.0
+
+toolchain go1.23.3
 
 require (
-	github.com/stretchr/testify v1.8.4
-	github.com/zalgonoise/x/errs v0.0.0-20230715141935-b6c226ca3c4c
-	go.opentelemetry.io/otel/trace v1.16.0
-	golang.org/x/exp v0.0.0-20230725093048-515e97ebf090
+	github.com/stretchr/testify v1.10.0
+	github.com/zalgonoise/x/cli v0.0.0-20250203160133-00bdc617d3a7
+	github.com/zalgonoise/x/errs v0.0.0-20250203160133-00bdc617d3a7
+	go.opentelemetry.io/otel/trace v1.34.0
+	golang.org/x/exp v0.0.0-20250128182459-e0ece0dbea4c
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	go.opentelemetry.io/otel v1.16.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
+	github.com/zalgonoise/cfg v1.0.0 // indirect
+	go.opentelemetry.io/otel v1.34.0 // indirect
 )
