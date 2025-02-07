@@ -2,16 +2,15 @@ package processor_test
 
 import (
 	"context"
+	"github.com/zalgonoise/apbrc/log"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/zalgonoise/apbrc/log"
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/zalgonoise/apbrc/config"
 	"github.com/zalgonoise/apbrc/processor"
-	"github.com/zalgonoise/apbrc/processor/modifiers"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
 	"github.com/zalgonoise/apbrc/processor/modifiers/input"
 )
@@ -42,21 +41,15 @@ func (fs *testFS) Rollback() error {
 	return nil
 }
 
-func initMods(cfg *config.Config, logger log.Logger) []processor.Applier {
+func initMods(cfg *config.Config, logger *slog.Logger) []processor.Applier {
 	mods := make([]processor.Applier, 0, 2)
 
 	if cfg.FrameRate != nil {
-		mods = append(mods, modifiers.ModifierWithLogs(
-			engine.FrameRate(*cfg.FrameRate),
-			logger,
-		))
+		mods = append(mods, engine.FrameRate(*cfg.FrameRate, logger))
 	}
 
 	if cfg.Input != nil {
-		mods = append(mods, modifiers.ModifierWithLogs(
-			input.Input(*cfg.Input),
-			logger,
-		))
+		mods = append(mods, input.Input(*cfg.Input, logger))
 	}
 
 	return mods
@@ -148,9 +141,7 @@ func TestProcessor_Run(t *testing.T) {
 	} {
 		t.Run(testcase.name, func(t *testing.T) {
 			ctx := context.Background()
-			logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{
-				AddSource: true,
-			}))
+			logger := log.New()
 			fs := &testFS{
 				basePath: baseDir + testcase.targetTestDir + topLevel,
 				filePath: testcase.targetDir + testcase.targetFile,
@@ -163,7 +154,7 @@ func TestProcessor_Run(t *testing.T) {
 			defer fs.Rollback()
 
 			mods := initMods(testcase.cfg, logger)
-			proc := processor.ProcessorWithLogs(processor.New(testcase.cfg, mods...), logger)
+			proc := processor.New(testcase.cfg, logger, mods...)
 			require.NotNil(t, proc)
 
 			if err = proc.Run(ctx); err != nil {

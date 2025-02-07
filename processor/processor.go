@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/zalgonoise/x/errs"
+	"log/slog"
 	"strings"
 
 	"github.com/zalgonoise/apbrc/config"
@@ -36,17 +37,19 @@ type Processor struct {
 	basePath string
 
 	cfg       *config.Config
+	logger    *slog.Logger
 	modifiers []Applier
 }
 
-// New creates a Processor from the input config.Config, and logx.Logger
-func New(cfg *config.Config, mods ...Applier) *Processor {
+// New creates a Processor from the input config.Config, slog.Logger and Applier(s)
+func New(cfg *config.Config, logger *slog.Logger, mods ...Applier) *Processor {
 	if cfg == nil || mods == nil {
 		return nil
 	}
 
 	return &Processor{
 		cfg:       cfg,
+		logger:    logger,
 		modifiers: mods,
 	}
 }
@@ -54,6 +57,8 @@ func New(cfg *config.Config, mods ...Applier) *Processor {
 // Run executes the processor, applying all configured Applier. It returns an error if raised, on an invalid base path
 // or on the first Applier-returned error
 func (p *Processor) Run(ctx context.Context) error {
+	p.logger.InfoContext(ctx, "executing processor")
+
 	if p.basePath == "" {
 		dir, ok := topLevel(p.cfg.Path)
 		if !ok {
@@ -65,9 +70,16 @@ func (p *Processor) Run(ctx context.Context) error {
 
 	for i := range p.modifiers {
 		if err := p.modifiers[i].Apply(ctx, p.basePath); err != nil {
+			p.logger.ErrorContext(ctx, "processor execution failed",
+				slog.String("error", err.Error()),
+				// TODO: add modifier info with fmt.Stringer implementation
+			)
+
 			return err
 		}
 	}
+
+	p.logger.InfoContext(ctx, "processor executed successfully")
 
 	return nil
 }
