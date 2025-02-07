@@ -2,6 +2,7 @@ package modifiers_test
 
 import (
 	"context"
+	"github.com/zalgonoise/apbrc/log"
 	"os"
 	"runtime"
 	"testing"
@@ -47,6 +48,7 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 		topLevel          = "/APB Reloaded"
 		fpsModifierFormat = "%s=%d"
 		lf                = "\n"
+		logger            = log.New()
 	)
 
 	if runtime.GOOS == "windows" {
@@ -58,7 +60,7 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 		targetTestDir string
 		targetDir     string
 		targetFile    string
-		modifier      modifiers.Applier
+		modifier      modifiers.Modifier
 	}{
 		{
 			name:          "FPSModifier/Original/Complete",
@@ -69,7 +71,7 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 				Cap: 300,
 				Min: 60,
 				Max: 300,
-			}),
+			}, logger),
 		},
 		{
 			name:          "FPSModifier/Original/Short",
@@ -80,15 +82,16 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 				Cap: 300,
 				Min: 60,
 				Max: 300,
-			}),
+			}, logger),
 		},
 		{
 			name:          "FPSModifier/Fake",
 			targetTestDir: "fps/short_fake",
 			targetDir:     "/Engine/Config",
 			targetFile:    "/BaseEngine.ini",
-			modifier: modifiers.NewModifier(
+			modifier: modifiers.New(
 				"/Engine/Config/BaseEngine.ini",
+				logger,
 				modifiers.KeyValue[int]{
 					Key:    "SomeAttributeKey",
 					Data:   600,
@@ -113,7 +116,7 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			targetFile:    "/DefaultInput.ini",
 			modifier: input.Input(config.InputConfig{
 				SprintLock: true,
-			}),
+			}, logger),
 		},
 		{
 			name:          "CrouchLock/Original/Complete",
@@ -122,7 +125,7 @@ func TestKeyValueModifier_Apply(t *testing.T) {
 			targetFile:    "/DefaultInput.ini",
 			modifier: input.Input(config.InputConfig{
 				CrouchHold: true,
-			}),
+			}, logger),
 		},
 	} {
 		t.Run(testcase.name, func(t *testing.T) {

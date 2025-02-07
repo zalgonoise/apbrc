@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"os"
 )
 
@@ -17,14 +18,17 @@ type Attribute interface {
 
 // Modifier is a data structure that will apply KeyValue-type modifications to a configuration file
 type Modifier struct {
+	logger *slog.Logger
+
 	FilePath   string
 	Attributes []Attribute
 }
 
-// NewModifier creates a Modifier of type T, configured with `filePath` as a base path,
-// and any number of KeyValue modifiers
-func NewModifier(filePath string, attributes ...Attribute) Modifier {
+// New creates a Modifier, configured with `filePath` as a base path,
+// and any number of Attribute modifiers
+func New(filePath string, logger *slog.Logger, attributes ...Attribute) Modifier {
 	return Modifier{
+		logger:     logger,
 		FilePath:   filePath,
 		Attributes: attributes,
 	}
@@ -34,10 +38,21 @@ func NewModifier(filePath string, attributes ...Attribute) Modifier {
 // configured base path), returning an error if raised
 func (m Modifier) Apply(ctx context.Context, basePath string) error {
 	if len(m.Attributes) == 0 {
+		m.logger.InfoContext(ctx,
+			"no modifiers to apply",
+			slog.Int("num_attributes", len(m.Attributes)),
+		)
+
 		return nil
 	}
 
 	path := basePath + m.FilePath
+
+	m.logger.InfoContext(ctx,
+		"reading config file to apply modifiers",
+		slog.String("path", path),
+		slog.Int("num_attributes", len(m.Attributes)),
+	)
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -46,9 +61,12 @@ func (m Modifier) Apply(ctx context.Context, basePath string) error {
 
 	reader := bufio.NewReader(f)
 	writer := bytes.NewBuffer(nil)
+	counter := -1
 
 scanLoop:
 	for {
+		counter++
+
 		var line []byte
 		line, err = reader.ReadBytes('\n')
 
@@ -62,7 +80,18 @@ scanLoop:
 
 		for i := range m.Attributes {
 			if ok, key := m.Attributes[i].Match(ctx, line); ok {
+				m.logger.DebugContext(ctx, "attribute matched configuration line",
+					slog.Int("line_number", counter),
+					slog.String("data", string(line)),
+				)
+
 				data, _ := m.Attributes[i].Value(ctx, key)
+
+				m.logger.DebugContext(ctx, "applying value",
+					slog.String("data", string(line)),
+					slog.String("final_value", string(data)),
+				)
+
 				if _, err = writer.Write(data); err != nil {
 					return err
 				}
@@ -78,6 +107,11 @@ scanLoop:
 			return err
 		}
 	}
+
+	m.logger.InfoContext(ctx,
+		"applying modifiers to config file",
+		slog.String("path", path),
+	)
 
 	if err = f.Close(); err != nil {
 		return err
@@ -95,6 +129,11 @@ scanLoop:
 	if err = f.Close(); err != nil {
 		return err
 	}
+
+	m.logger.InfoContext(ctx,
+		"overwritten configuration file successfully",
+		slog.String("path", path),
+	)
 
 	return nil
 }
