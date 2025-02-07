@@ -5,9 +5,7 @@ import (
 	"flag"
 	"github.com/zalgonoise/apbrc/checker"
 	"github.com/zalgonoise/apbrc/config"
-	"github.com/zalgonoise/apbrc/log"
 	"github.com/zalgonoise/apbrc/processor"
-	"github.com/zalgonoise/apbrc/processor/modifiers"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
 	"github.com/zalgonoise/apbrc/processor/modifiers/input"
 	"github.com/zalgonoise/x/cli"
@@ -39,7 +37,7 @@ func ExecApply(ctx context.Context, logger *slog.Logger, args []string) (int, er
 
 	mods := initMods(cfg, logger)
 
-	proc := processor.ProcessorWithLogs(processor.New(cfg, mods...), logger)
+	proc := processor.New(cfg, logger, mods...)
 
 	if err = proc.Run(ctx); err != nil {
 		return 1, err
@@ -87,21 +85,15 @@ func ExecCheck(ctx context.Context, logger *slog.Logger, args []string) (int, er
 	}
 }
 
-func initMods(cfg *config.Config, logger log.Logger) []processor.Applier {
+func initMods(cfg *config.Config, logger *slog.Logger) []processor.Applier {
 	mods := make([]processor.Applier, 0, 2)
 
 	if cfg.FrameRate != nil {
-		mods = append(mods, modifiers.ModifierWithLogs(
-			engine.FrameRate(*cfg.FrameRate),
-			logger,
-		))
+		mods = append(mods, engine.FrameRate(*cfg.FrameRate, logger))
 	}
 
 	if cfg.Input != nil {
-		mods = append(mods, modifiers.ModifierWithLogs(
-			input.Input(*cfg.Input),
-			logger,
-		))
+		mods = append(mods, input.Input(*cfg.Input, logger))
 	}
 
 	return mods
