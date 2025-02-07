@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"log/slog"
 	"runtime"
 	"strings"
 
@@ -23,7 +24,7 @@ const (
 
 // FrameRate creates a new frame-rate Modifier, which affects the engine's configuration for frame rate;
 // updating its smoothed minimum and maximum frame rates, as well as the frame rate cap.
-func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
+func FrameRate(cfg config.FrameRateConfig, logger *slog.Logger) modifiers.Modifier {
 	sb := &strings.Builder{}
 	sb.WriteString(fpsModifierFormat)
 
@@ -58,5 +59,5 @@ func FrameRate(cfg config.FrameRateConfig) modifiers.Modifier {
 		})
 	}
 
-	return modifiers.NewModifier(fpsModifierPath, mods...)
+	return modifiers.New(fpsModifierPath, logger, mods...)
 }

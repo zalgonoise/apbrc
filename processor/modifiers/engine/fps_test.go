@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"github.com/zalgonoise/apbrc/log"
 	"runtime"
 	"testing"
 
@@ -11,6 +12,7 @@ import (
 )
 
 func TestNewFPSModifier(t *testing.T) {
+	logger := log.New()
 	lf := "\n"
 	if runtime.GOOS == "windows" {
 		lf = "\r\n"
@@ -103,7 +105,7 @@ func TestNewFPSModifier(t *testing.T) {
 				Cap: testcase.frameRateCap,
 				Min: testcase.frameRateMin,
 				Max: testcase.frameRateMax,
-			})
+			}, logger)
 			require.Equal(t, testcase.wants, mod)
 		})
 	}
