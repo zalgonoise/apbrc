@@ -3,32 +3,28 @@ package input
 import (
 	"github.com/zalgonoise/apbrc/config"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
+	"log/slog"
 )
 
 const inputBindingsModifierPath = `/APBGame/Config/DefaultInput.ini`
 
-func Input(cfg config.InputConfig) modifiers.Modifier {
-	mod := modifiers.Modifier{
-		FilePath:   inputBindingsModifierPath,
-		Attributes: make([]modifiers.Attribute, 0, 2),
-	}
-
+func Input(cfg config.InputConfig, logger *slog.Logger) modifiers.Modifier {
 	if cfg.Reset {
-		mod.Attributes = append(mod.Attributes,
+		return modifiers.New(inputBindingsModifierPath, logger,
 			SprintLock(false),
 			CrouchLock(false),
 		)
-
-		return mod
 	}
 
+	attrs := make([]modifiers.Attribute, 0, 2)
+
 	if cfg.SprintLock {
-		mod.Attributes = append(mod.Attributes, SprintLock(cfg.SprintLock))
+		attrs = append(attrs, SprintLock(cfg.SprintLock))
 	}
 
 	if cfg.CrouchHold {
-		mod.Attributes = append(mod.Attributes, CrouchLock(cfg.CrouchHold))
+		attrs = append(attrs, CrouchLock(cfg.CrouchHold))
 	}
 
-	return mod
+	return modifiers.New(inputBindingsModifierPath, logger, attrs...)
 }
