@@ -2,6 +2,7 @@ package log
 
 import (
 	"context"
+	"github.com/zalgonoise/cfg"
 	"log/slog"
 	"os"
 
@@ -18,18 +19,14 @@ type SpanContextHandler struct {
 	handler    slog.Handler
 }
 
-func NewSpanContextHandler(opts ...SpanContextHandlerOption) slog.Handler {
-	h := &SpanContextHandler{}
+func New(opts ...cfg.Option[*SpanContextHandler]) *slog.Logger {
+	h := cfg.New[*SpanContextHandler](opts...)
 
-	for i := range opts {
-		opts[i].apply(h)
-	}
-
-	if h.handler == nil || h.handler == zeroHandler {
+	if h.handler == nil {
 		h.handler = defaultHandler()
 	}
 
-	return h
+	return slog.New(h)
 }
 
 func defaultHandler() slog.Handler {
