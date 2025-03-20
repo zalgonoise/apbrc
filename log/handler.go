@@ -2,10 +2,10 @@ package log
 
 import (
 	"context"
-	"github.com/zalgonoise/cfg"
 	"log/slog"
 	"os"
 
+	"github.com/zalgonoise/cfg"
 	"go.opentelemetry.io/otel/trace"
 )
 

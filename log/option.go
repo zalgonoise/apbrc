@@ -1,8 +1,9 @@
 package log
 
 import (
-	"github.com/zalgonoise/cfg"
 	"log/slog"
+
+	"github.com/zalgonoise/cfg"
 )
 
 func WithSpanID() cfg.Option[*SpanContextHandler] {
