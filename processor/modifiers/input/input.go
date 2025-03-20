@@ -1,9 +1,10 @@
 package input
 
 import (
+	"log/slog"
+
 	"github.com/zalgonoise/apbrc/config"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
-	"log/slog"
 )
 
 const inputBindingsModifierPath = `/APBGame/Config/DefaultInput.ini`
