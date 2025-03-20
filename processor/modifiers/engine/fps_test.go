@@ -1,13 +1,13 @@
 package engine
 
 import (
-	"github.com/zalgonoise/apbrc/log"
 	"runtime"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	"github.com/zalgonoise/apbrc/config"
+	"github.com/zalgonoise/apbrc/log"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
 )
 
