@@ -2,7 +2,6 @@ package modifiers_test
 
 import (
 	"context"
-	"github.com/zalgonoise/apbrc/log"
 	"os"
 	"runtime"
 	"testing"
@@ -10,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/zalgonoise/apbrc/config"
+	"github.com/zalgonoise/apbrc/log"
 	"github.com/zalgonoise/apbrc/processor/modifiers"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
 	"github.com/zalgonoise/apbrc/processor/modifiers/input"
