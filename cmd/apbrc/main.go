@@ -3,15 +3,20 @@ package main
 import (
 	"context"
 	"flag"
+	"log/slog"
+	"net/http"
+	"os"
+	"path"
+	"time"
+
+	"github.com/zalgonoise/x/cli"
+	"github.com/zalgonoise/x/pluslog"
+
 	"github.com/zalgonoise/apbrc/checker"
 	"github.com/zalgonoise/apbrc/config"
 	"github.com/zalgonoise/apbrc/processor"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
 	"github.com/zalgonoise/apbrc/processor/modifiers/input"
-	"github.com/zalgonoise/x/cli"
-	"log/slog"
-	"net/http"
-	"time"
 )
 
 var modes = []string{"", "apply", "check"}
@@ -34,6 +39,15 @@ func ExecApply(ctx context.Context, logger *slog.Logger, args []string) (int, er
 	if err != nil {
 		return 1, err
 	}
+
+	logFile, err := os.Create(path.Join(cfg.Path, "apbrc.log"))
+	if err != nil {
+		return 1, err
+	}
+
+	defer logFile.Close()
+
+	logger = slog.New(pluslog.Multi(logger.Handler(), slog.NewTextHandler(logFile, nil)))
 
 	mods := initMods(cfg, logger)
 
@@ -58,6 +72,20 @@ func ExecCheck(ctx context.Context, logger *slog.Logger, args []string) (int, er
 	if err := fs.Parse(args); err != nil {
 		return 1, err
 	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		return 1, err
+	}
+
+	logFile, err := os.Create(path.Join(pwd, "apbrc.log"))
+	if err != nil {
+		return 1, err
+	}
+
+	defer logFile.Close()
+
+	logger = slog.New(pluslog.Multi(logger.Handler(), slog.NewTextHandler(logFile, nil)))
 
 	if *count > 0 {
 		logger.InfoContext(ctx, "pinging", slog.Int("num_pings", *count))
