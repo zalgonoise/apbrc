@@ -2,14 +2,14 @@ package processor_test
 
 import (
 	"context"
-	"github.com/zalgonoise/apbrc/log"
+	"log/slog"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"log/slog"
 
 	"github.com/zalgonoise/apbrc/config"
+	"github.com/zalgonoise/apbrc/log"
 	"github.com/zalgonoise/apbrc/processor"
 	"github.com/zalgonoise/apbrc/processor/modifiers/engine"
 	"github.com/zalgonoise/apbrc/processor/modifiers/input"

@@ -3,9 +3,10 @@ package processor
 import (
 	"context"
 	"fmt"
-	"github.com/zalgonoise/x/errs"
 	"log/slog"
 	"strings"
+
+	"github.com/zalgonoise/x/errs"
 
 	"github.com/zalgonoise/apbrc/config"
 )
