@@ -1,0 +1,12 @@
+version: '3'
+
+vars:
+  VERSION: 0.4.1
+  ARCH: amd64
+  OS: windows
+  EXT: .exe
+
+tasks:
+  build:
+    cmds:
+        - go build -o bin/apbrc_v{{.VERSION}}_{{.ARCH}}_{{.OS}}{{.EXT}} -ldflags='-s -w' ./cmd/apbrc
