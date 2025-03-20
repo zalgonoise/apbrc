@@ -22,65 +22,77 @@ func CheckAll(ctx context.Context, logger *slog.Logger,
 	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
-	patchReq, err := http.NewRequestWithContext(ctx, http.MethodGet, patchURL, http.NoBody)
+	patchReq, err := http.NewRequestWithContext(ctx, http.MethodHead, patchURL, http.NoBody)
 	if err != nil {
 		return false
 	}
 
-	if err := httpDo(client, patchReq); err != nil {
-		logger.ErrorContext(ctx, "failed to ping patch URL", slog.String("error", err.Error()))
+	code, err := httpDo(client, patchReq)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to ping patch URL",
+			slog.String("error", err.Error()), slog.Int("status_code", code))
 
 		if failFast {
 			return false
 		}
 
 		ok = false
+	} else {
+		logger.InfoContext(ctx, "pinged patch URL successfully", slog.Int("status_code", code))
 	}
 
-	notesReq, err := http.NewRequestWithContext(ctx, http.MethodGet, notesURL, http.NoBody)
+	notesReq, err := http.NewRequestWithContext(ctx, http.MethodHead, notesURL, http.NoBody)
 	if err != nil {
 		return false
 	}
 
-	if err := httpDo(client, notesReq); err != nil {
-		logger.ErrorContext(ctx, "failed to ping notes URL", slog.String("error", err.Error()))
+	code, err = httpDo(client, notesReq)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to ping notes URL",
+			slog.String("error", err.Error()), slog.Int("status_code", code))
 
 		if failFast {
 			return false
 		}
 
 		ok = false
+	} else {
+		logger.InfoContext(ctx, "pinged notes URL successfully", slog.Int("status_code", code))
 	}
 
-	crashReportReq, err := http.NewRequestWithContext(ctx, http.MethodGet, crashReportURL, http.NoBody)
+	crashReportReq, err := http.NewRequestWithContext(ctx, http.MethodHead, crashReportURL, http.NoBody)
 	if err != nil {
 		return false
 	}
 
-	if err := httpDo(client, crashReportReq); err != nil {
-		logger.ErrorContext(ctx, "failed to ping crash report URL", slog.String("error", err.Error()))
+	code, err = httpDo(client, crashReportReq)
+	if err != nil {
+		logger.ErrorContext(ctx, "failed to ping crash report URL",
+			slog.String("error", err.Error()), slog.Int("status_code", code))
 
 		if failFast {
 			return false
 		}
 
 		ok = false
+	} else {
+		logger.InfoContext(ctx, "pinged crash report URL successfully", slog.Int("status_code", code))
 	}
 
 	return ok
 }
 
-func httpDo(client *http.Client, req *http.Request) error {
+func httpDo(client *http.Client, req *http.Request) (int, error) {
 	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	defer res.Body.Close()
 
-	if res.StatusCode > 399 {
-		return fmt.Errorf("failing status code: %s", res.Status)
+	if res.StatusCode > 499 {
+		return res.StatusCode, fmt.Errorf("failing status code: %s", res.Status)
 	}
 
-	return nil
+	return res.StatusCode, nil
 }
